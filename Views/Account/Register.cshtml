@@ -1,0 +1,2 @@
+@model RegisterVm
+<h1>Създай профил</h1><form class="formbox" asp-action="Register" method="post"><div asp-validation-summary="All" class="error"></div><label>Имейл<input asp-for="Email" type="email" required/></label><label>Парола<input asp-for="Password" type="password" required/></label><label>Повтори паролата<input asp-for="ConfirmPassword" type="password" required/></label><button class="btn">Регистрация</button></form>

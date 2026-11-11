@@ -1,0 +1,2 @@
+@model List<Favorite>
+<h1>Любими места</h1>@if(!Model.Any()){<p>Все още нямаш любими места.</p>}@foreach(var f in Model){<div class="review"><a asp-controller="Home" asp-action="Details" asp-route-id="@f.SpotId">@f.Spot.Name</a> · @f.Spot.City</div>}

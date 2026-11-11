@@ -1,0 +1,2 @@
+@model LoginVm
+<h1>Вход</h1><form class="formbox" asp-action="Login" method="post"><div asp-validation-summary="All" class="error"></div><input asp-for="ReturnUrl" type="hidden"/><label>Имейл<input asp-for="Email" type="email" required/></label><label>Парола<input asp-for="Password" type="password" required/></label><button class="btn">Влез</button></form>

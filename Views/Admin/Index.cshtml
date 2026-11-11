@@ -1,0 +1,2 @@
+@model List<Spot>
+<h1>Администрация</h1><p><a class="btn" asp-action="Create">+ Добави място</a></p>@foreach(var s in Model){<div class="review"><b>@s.Name</b> · @s.City <a asp-action="Edit" asp-route-id="@s.Id">Редакция</a><form asp-action="Delete" method="post" style="display:inline"><input type="hidden" name="id" value="@s.Id"/><button onclick="return confirm('Изтриване?')">Изтрий</button></form></div>}
