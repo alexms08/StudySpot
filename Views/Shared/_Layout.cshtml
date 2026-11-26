@@ -1,1 +1,41 @@
-<!DOCTYPE html><html lang="bg"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>StudySpot – Намери място за учене</title><link rel="stylesheet" href="~/css/site.css"/></head><body><header><nav class="nav container"><a class="brand" asp-controller="Home" asp-action="Index">📚 StudySpot</a><div class="links"><a asp-controller="Home" asp-action="Index">Места</a>@if(User.Identity?.IsAuthenticated==true){<a asp-controller="Favorites" asp-action="Index">Любими</a>@if(User.IsInRole("Admin")){<a asp-controller="Admin" asp-action="Index">Админ</a>}<form asp-controller="Account" asp-action="Logout" method="post"><button class="linkbtn">Изход</button></form>}else{<a asp-controller="Account" asp-action="Login">Вход</a><a class="btn small" asp-controller="Account" asp-action="Register">Регистрация</a>}</div></nav></header><main class="container">@RenderBody()</main><footer class="container">StudySpot · Дипломен проект · Демонстрационни данни</footer></body></html>
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="StudySpot – открий удобно място за учене, оцени го и сподели нови локации." />
+  <title>StudySpot – Намери място за учене</title>
+  <link rel="stylesheet" asp-append-version="true" href="~/css/site.css" />
+</head>
+<body>
+  <header>
+    <nav class="nav container" aria-label="Основна навигация">
+      <a class="brand" asp-controller="Home" asp-action="Index"><span class="brandicon">✦</span> StudySpot</a>
+      <div class="links">
+        <a asp-controller="Home" asp-action="Index">Открий места</a>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+          <a asp-controller="PlaceSuggestions" asp-action="Create">Предложи място</a>
+          <a asp-controller="PlaceSuggestions" asp-action="My">Моите предложения</a>
+          <a asp-controller="Favorites" asp-action="Index">Любими</a>
+          @if (User.IsInRole("Admin")) { <a asp-controller="Admin" asp-action="Index">Администрация</a> }
+          <form asp-controller="Account" asp-action="Logout" method="post"><button class="linkbtn" type="submit">Изход</button></form>
+        }
+        else
+        {
+          <a asp-controller="Account" asp-action="Login">Вход</a>
+          <a class="btn small" asp-controller="Account" asp-action="Register">Регистрация</a>
+        }
+      </div>
+    </nav>
+  </header>
+  <main class="container">
+    @if (TempData["Notice"] is string notice) { <div class="notice" role="status">@notice</div> }
+    @RenderBody()
+  </main>
+  <footer class="container">
+    <strong>StudySpot</strong> · Учим по-добре заедно ·
+    <span>Информацията за местата подлежи на проверка. Потвърди работното време преди посещение.</span>
+  </footer>
+</body>
+</html>

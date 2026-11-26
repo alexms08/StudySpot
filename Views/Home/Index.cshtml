@@ -1,4 +1,103 @@
 @model List<Spot>
-<section class="hero"><span class="eyebrow">Твоето пространство за концентрация</span><h1>Намери идеалното място <em>за учене.</em></h1><p>Библиотеки, кафенета и coworking пространства — на едно място.</p></section>
-<form method="get" class="filters"><input name="q" placeholder="Търси по име или адрес..." value="@Context.Request.Query["q"]"/><input name="city" placeholder="Град" value="@Context.Request.Query["city"]"/><select name="category"><option value="">Всички категории</option>@foreach(var cat in new[]{"Библиотека","Кафене","Coworking"}){<option value="@cat" selected="@(Context.Request.Query["category"]==cat)">@cat</option>}</select><label><input type="checkbox" name="wifi" value="true" checked="@(Context.Request.Query["wifi"]=="true")"/> Wi-Fi</label><label><input type="checkbox" name="outlets" value="true" checked="@(Context.Request.Query["outlets"]=="true")"/> Контакти</label><label><input type="checkbox" name="quiet" value="true" checked="@(Context.Request.Query["quiet"]=="true")"/> Тихо</label><button class="btn">Търси</button></form>
-<div class="sectiontitle"><h2>Открий места</h2><span>@Model.Count резултата</span></div><div class="cards">@foreach(var spot in Model){<article class="spot"><div class="spotart">@(spot.Category=="Кафене"?"☕":spot.Category=="Coworking"?"💻":"📖")</div><div class="spotbody"><span class="chip">@spot.Category</span><h3>@spot.Name</h3><p>📍 @spot.City · @spot.Address</p><div class="tags">@if(spot.Wifi){<span>📶 Wi-Fi</span>}@if(spot.Outlets){<span>🔌 Контакти</span>}@if(spot.Quiet){<span>🤫 Тихо</span>}</div><div class="spotfoot"><strong>@(spot.PricePerHour==0?"Без такса":$"{spot.PricePerHour} лв./час")</strong><a class="btn small" asp-action="Details" asp-route-id="@spot.Id">Виж повече</a></div></div></article>}</div>@if(!Model.Any()){<p>Няма намерени места. Опитай с други филтри.</p>}
+@{
+    var total = (int)ViewBag.Total;
+    var page = (int)ViewBag.Page;
+    var pages = (int)ViewBag.Pages;
+    var currentSort = Context.Request.Query["sort"].ToString();
+    var currentRating = Context.Request.Query["minRating"].ToString();
+}
+<section class="hero">
+  <span class="eyebrow">StudySpot 2.0 · Твоето място за концентрация</span>
+  <h1>Намери вдъхновение. <em>Намери своето място.</em></h1>
+  <p>Открий библиотеки, кафенета и споделени пространства, сравни удобствата и сподели откритията си.</p>
+  @if (User.Identity?.IsAuthenticated == true)
+  {
+    <a class="btn" asp-controller="PlaceSuggestions" asp-action="Create">+ Предложи ново място</a>
+  }
+</section>
+
+<form method="get" class="filters" aria-label="Търсене и филтри">
+  <div class="filterfield"><label for="q">Търсене</label><input id="q" name="q" placeholder="Име, адрес, описание..." value="@(Context.Request.Query["q"])" /></div>
+  <div class="filterfield"><label for="city">Град</label><input id="city" name="city" placeholder="Например Бургас" value="@(Context.Request.Query["city"])" /></div>
+  <div class="filterfield"><label for="category">Категория</label>
+    <select id="category" name="category">
+      <option value="">Всички</option>
+      @foreach (var cat in new[] { "Библиотека", "Кафене", "Coworking" })
+      {
+        <option value="@cat" selected="@(Context.Request.Query["category"] == cat)">@cat</option>
+      }
+    </select>
+  </div>
+  <div class="filterfield"><label for="sort">Подредба</label>
+    <select id="sort" name="sort">
+      <option value="name" selected="@(string.IsNullOrEmpty(currentSort) || currentSort == "name")">По име</option>
+      <option value="rating" selected="@(currentSort == "rating")">Най-висок рейтинг</option>
+      <option value="price" selected="@(currentSort == "price")">Най-ниска цена</option>
+      <option value="newest" selected="@(currentSort == "newest")">Най-нови</option>
+    </select>
+  </div>
+  <div class="filterfield"><label for="minRating">Рейтинг</label>
+    <select id="minRating" name="minRating">
+      <option value="0">Всички</option>
+      @for (var i = 3; i <= 5; i++)
+      {
+        <option value="@i" selected="@(currentRating == i.ToString())">@i+ звезди</option>
+      }
+    </select>
+  </div>
+  <div class="checks">
+    <label><input type="checkbox" name="wifi" value="true" checked="@(Context.Request.Query["wifi"] == "true")" /> Wi-Fi</label>
+    <label><input type="checkbox" name="outlets" value="true" checked="@(Context.Request.Query["outlets"] == "true")" /> Контакти</label>
+    <label><input type="checkbox" name="quiet" value="true" checked="@(Context.Request.Query["quiet"] == "true")" /> Тихо</label>
+  </div>
+  <button class="btn" type="submit">Намери място</button>
+</form>
+
+<div class="sectiontitle"><h2>Открий места</h2><span>@total резултата</span></div>
+@if (!Model.Any())
+{
+  <div class="empty">
+    <div class="emptyicon">📖</div>
+    <h3>Все още няма места с тези критерии</h3>
+    <p>Промени филтрите или предложи ново място. Публикуваме само места, добавени от администратор.</p>
+    <a class="btn small" asp-controller="PlaceSuggestions" asp-action="Create">Предложи място</a>
+  </div>
+}
+else
+{
+  <div class="cards">
+    @foreach (var spot in Model)
+    {
+      <article class="spot">
+        <div class="spotart">@(spot.Category == "Кафене" ? "☕" : spot.Category == "Coworking" ? "💻" : "📚")</div>
+        <div class="spotbody">
+          <div class="cardtop"><span class="chip">@spot.Category</span>@if (spot.IsVerified) { <span class="verified">✓ Проверено</span> }</div>
+          <h3>@spot.Name</h3>
+          <p>📍 @spot.City · @spot.Address</p>
+          <div class="tags">
+            @if (spot.Wifi) { <span>📶 Wi-Fi</span> }
+            @if (spot.Outlets) { <span>🔌 Контакти</span> }
+            @if (spot.Quiet) { <span>🤫 Тихо</span> }
+            @if (spot.Reviews.Count > 0) { <span>⭐ @spot.Reviews.Average(r => r.Rating).ToString("0.0") (@spot.Reviews.Count)</span> }
+          </div>
+          <div class="spotfoot">
+            <strong>@(spot.PricePerHour == 0 ? "Без посочена такса" : $"{spot.PricePerHour} лв./час")</strong>
+            <a class="btn small" asp-action="Details" asp-route-id="@spot.Id">Виж повече</a>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+}
+@if (pages > 1)
+{
+  <form method="get" class="pagination">
+    @foreach (var key in new[] { "q", "city", "category", "sort", "minRating", "wifi", "outlets", "quiet" })
+    {
+      <input type="hidden" name="@key" value="@(Context.Request.Query[key])" />
+    }
+    @if (page > 1) { <button type="submit" name="page" value="@(page - 1)">← Предишна</button> }
+    <span>Страница @page от @pages</span>
+    @if (page < pages) { <button type="submit" name="page" value="@(page + 1)">Следваща →</button> }
+  </form>
+}

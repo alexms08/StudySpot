@@ -1,0 +1,23 @@
+@model PlaceSuggestionVm
+<a class="backlink" asp-controller="Home" asp-action="Index">← Към местата</a>
+<h1>Предложи място за учене</h1>
+<p class="muted">Предложението ще се появи след преглед от администратор. Попълвай само информация, която можеш да потвърдиш.</p>
+<form asp-action="Create" method="post" class="formbox">
+  <div asp-validation-summary="All" class="error"></div>
+  <label>Име на мястото<input asp-for="Name" required maxlength="100" /></label>
+  <label>Град<input asp-for="City" required maxlength="50" /></label>
+  <label>Адрес<input asp-for="Address" required maxlength="150" /></label>
+  <label>Категория<select asp-for="Category"><option>Библиотека</option><option>Кафене</option><option>Coworking</option></select></label>
+  <label>Описание<textarea asp-for="Description" maxlength="600"></textarea></label>
+  <label>Официален уебсайт (по желание)<input asp-for="Website" type="url" /></label>
+  <label>Работно време<input asp-for="OpeningHours" /></label>
+  <label>Географска ширина<input asp-for="Latitude" type="number" step="any" /></label>
+  <label>Географска дължина<input asp-for="Longitude" type="number" step="any" /></label>
+  <label>Цена на час, ако е известна (лв.)<input asp-for="PricePerHour" type="number" min="0" /></label>
+  <div class="checks">
+    <label><input asp-for="Wifi" /> Wi-Fi</label>
+    <label><input asp-for="Outlets" /> Контакти</label>
+    <label><input asp-for="Quiet" /> Тихо</label>
+  </div>
+  <button class="btn" type="submit">Изпрати за одобрение</button>
+</form>

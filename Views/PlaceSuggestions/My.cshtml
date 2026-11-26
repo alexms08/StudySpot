@@ -1,0 +1,12 @@
+@model List<PlaceSuggestion>
+<h1>Моите предложения</h1>
+<p><a class="btn small" asp-action="Create">+ Предложи ново място</a></p>
+@if (!Model.Any()) { <div class="empty">Все още не си предложил място.</div> }
+@foreach (var item in Model)
+{
+  <div class="review">
+    <b>@item.Name</b> · @item.City
+    <p>@item.Address</p>
+    <span class="chip">@(item.Status == "Approved" ? "Одобрено" : item.Status == "Rejected" ? "Отхвърлено" : "Очаква проверка")</span>
+  </div>
+}
