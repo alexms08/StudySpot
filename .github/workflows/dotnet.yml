@@ -1,0 +1,22 @@
+name: Build and test StudySpot
+on:
+  push:
+    branches: [studyspot-v2]
+  pull_request:
+    branches: [master, studyspot-v2]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore StudySpot.csproj
+      - name: Build
+        run: dotnet build StudySpot.csproj --configuration Release --no-restore
+      - name: Unit tests
+        run: dotnet test StudySpot.Tests/StudySpot.Tests.csproj --configuration Release

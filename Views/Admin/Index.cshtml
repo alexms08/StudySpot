@@ -1,2 +1,38 @@
 @model List<Spot>
-<h1>Администрация</h1><p><a class="btn" asp-action="Create">+ Добави място</a></p>@foreach(var s in Model){<div class="review"><b>@s.Name</b> · @s.City <a asp-action="Edit" asp-route-id="@s.Id">Редакция</a><form asp-action="Delete" method="post" style="display:inline"><input type="hidden" name="id" value="@s.Id"/><button onclick="return confirm('Изтриване?')">Изтрий</button></form></div>}
+@{
+  var suggestions = ViewBag.Suggestions as List<PlaceSuggestion> ?? new List<PlaceSuggestion>();
+}
+<h1>Администрация</h1>
+<p class="muted">Управлявай местата и преглеждай предложенията на потребителите.</p>
+<p><a class="btn" asp-action="Create">+ Добави място</a></p>
+<h2>Чакащи предложения (@suggestions.Count)</h2>
+@if (!suggestions.Any()) { <p class="muted">Няма чакащи предложения.</p> }
+@foreach (var suggestion in suggestions)
+{
+  <article class="review">
+    <h3>@suggestion.Name · @suggestion.City</h3>
+    <p>@suggestion.Address</p><p>@suggestion.Description</p>
+    @if (!string.IsNullOrEmpty(suggestion.Website)) { <a href="@suggestion.Website" target="_blank" rel="noopener noreferrer">Сайт ↗</a> }
+    <p class="muted">Преди одобряване провери адреса и информацията. Одобрените места се отбелязват като непроверени до допълнителен преглед.</p>
+    <form asp-action="ReviewSuggestion" method="post" class="rowbuttons">
+      <input type="hidden" name="id" value="@suggestion.Id" />
+      <button class="btn small" name="approve" value="true" type="submit">Одобри</button>
+      <button class="buttonsecondary small" name="approve" value="false" type="submit">Отхвърли</button>
+    </form>
+  </article>
+}
+<h2>Публикувани места (@Model.Count)</h2>
+@foreach (var spot in Model)
+{
+  <article class="review">
+    <b>@spot.Name</b> · @spot.City
+    @if (spot.IsVerified) { <span class="verified">✓ Проверено</span> }
+    <div class="rowbuttons">
+      <a class="btn small" asp-action="Edit" asp-route-id="@spot.Id">Редакция</a>
+      <form asp-action="Delete" method="post" onsubmit="return confirm('Сигурни ли сте?')">
+        <input type="hidden" name="id" value="@spot.Id" />
+        <button class="buttonsecondary small" type="submit">Изтрий</button>
+      </form>
+    </div>
+  </article>
+}

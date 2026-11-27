@@ -1,55 +1,31 @@
-# StudySpot — дипломен проект
+# StudySpot 2.0 – дипломен проект
 
-StudySpot е демонстрационно уеб приложение за търсене на удобни места за учене.
-
-## Технологии
-- C# / ASP.NET Core MVC (.NET 8)
-- Entity Framework Core 8 / SQLite
-- ASP.NET Core Identity (потребители, пароли, роли)
-- Razor Views, HTML, CSS, OpenStreetMap iframe
+ASP.NET Core MVC / .NET 8. Приложението се стартира само на локалния компютър, на http://localhost:5080. Не публикувайте в Render или друга публична хостинг услуга.
 
 ## Стартиране
-1. Инсталирайте Visual Studio 2022 с workload **ASP.NET and web development** и .NET 8 SDK.
-2. Отворете `StudySpot.csproj` във Visual Studio.
-3. Изчакайте NuGet Restore.
-4. Стартирайте с F5 или от терминал: `dotnet restore` и `dotnet run`.
-5. SQLite базата `studyspot.db` се създава автоматично при първо стартиране. Началните 3 места са **измислени демонстрационни записи**.
-6. Създайте профил през Регистрация.
-
-## Администратор
-От съображения за сигурност не се създава публичен администратор с известна парола. За локална демонстрация: регистрирайте нормален профил, спрете приложението, отворете `studyspot.db` с DB Browser for SQLite и изпълнете SQL:
-
-```sql
-INSERT INTO AspNetUserRoles (UserId, RoleId)
-SELECT u.Id, r.Id FROM AspNetUsers u CROSS JOIN AspNetRoles r
-WHERE u.Email = 'YOUR_EMAIL@example.com' AND r.Name = 'Admin';
+Клонирайте хранилището и изберете branch studyspot-v2. Отворете StudySpot.csproj във Visual Studio 2022 с .NET 8 SDK. Стартирайте с профил Project (не IIS Express), или от терминал:
+```powershell
+dotnet restore StudySpot.csproj
+dotnet run --project StudySpot.csproj --no-launch-profile
 ```
+Отворете http://localhost:5080. Без настройки се използва локална SQLite база за демонстрация.
 
-Сменете имейла с този на вашия профил, след това влезте отново. В менюто ще се появи Админ.
+## Облачна PostgreSQL (по желание)
+В Render > studyspot-db > Connect копирайте External Database URL. В локалния терминал:
+```powershell
+dotnet user-secrets set "DATABASE_URL" "YOUR_EXTERNAL_DATABASE_URL" --project StudySpot.csproj
+$env:ASPNETCORE_ENVIRONMENT = "Development"
+dotnet run --project StudySpot.csproj --no-launch-profile
+```
+Заменете примерната стойност само локално. Не качвайте пароли в GitHub. Ограничете външния достъп до базата до IP адресите на упълномощените компютри. Безплатната база изтича на 26.12.2026.
 
 ## Функции
-- Регистрация, вход, изход (Identity)
-- Търсене по име, адрес, описание, град и категория
-- Филтри за Wi-Fi, контакти и тишина
-- Детайли за място и OpenStreetMap карта
-- Оценки от 1 до 5 и коментари (един отзив на потребител за място, с възможност за обновяване)
-- Любими места
-- Администраторски CRUD за места
-- Responsive оформление
+Регистрация, вход, любими, оценки, филтри, предложения за места и администраторско одобрение. EF Core създава таблиците при първото стартиране на празна база. Начални библиотечни записи: DATA_SOURCES.md. За съществуваща база използвайте миграции, не изтривайте данни.
 
-## Важни уточнения
-- Началните данни са **примерни**, а не проверени реални обекти.
-- Няма автоматично геолокационно сортиране, резервации или проверка за налични места.
-- OpenStreetMap картата изисква интернет.
-- `EnsureCreated` е удобен за демонстрация, но за production е препоръчително да се премине към EF Core migrations.
-- За production са необходими HTTPS, конфигурирана защита на акаунти, мониторинг, резервни копия и политика за лични данни.
-- Проектът е генериран като изходен код; **не е компилиран или изпитан в тази среда** (няма инсталиран .NET SDK).
+## Администратор
+В Development задайте ADMIN_BOOTSTRAP_EMAIL и ADMIN_BOOTSTRAP_PASSWORD чрез dotnet user-secrets. Стартирайте веднъж, после премахнете двете настройки. Не се повишава автоматично съществуващ потребител.
 
-## Структура
-`Controllers/` — MVC контролери; `Models/` — обекти; `Data/` — база данни и начални данни; `Views/` — Razor интерфейс; `wwwroot/css/` — стилове.
-
-## Проверки и документация
-- `TECHNICAL_DOCUMENTATION.docx` — пълна техническа документация.
-- `TEST_REPORT.md` — реално изпълнени и неизпълнени проверки.
-- `python -m unittest discover -s tests -v` — структурни проверки.
-- Важно: изисква се локална компилация и функционални тестове с .NET 8.
+## Тестове
+```powershell
+dotnet test StudySpot.Tests/StudySpot.Tests.csproj
+```
