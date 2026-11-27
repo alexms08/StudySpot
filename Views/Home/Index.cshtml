@@ -1,10 +1,10 @@
 @model List<Spot>
 @{
     var total = (int)ViewBag.Total;
-    var page = (int)ViewBag.Page;
+    var currentPage = (int)ViewBag.Page;
     var pages = (int)ViewBag.Pages;
-    var currentSort = Context.Request.Query["sort"].ToString();
-    var currentRating = Context.Request.Query["minRating"].ToString();
+    var currentSort = ViewContext.HttpContext.Request.Query["sort"].ToString();
+    var currentRating = ViewContext.HttpContext.Request.Query["minRating"].ToString();
 }
 <section class="hero">
   <span class="eyebrow">StudySpot 2.0 · Твоето място за концентрация</span>
@@ -17,14 +17,14 @@
 </section>
 
 <form method="get" class="filters" aria-label="Търсене и филтри">
-  <div class="filterfield"><label for="q">Търсене</label><input id="q" name="q" placeholder="Име, адрес, описание..." value="@(Context.Request.Query["q"])" /></div>
-  <div class="filterfield"><label for="city">Град</label><input id="city" name="city" placeholder="Например Бургас" value="@(Context.Request.Query["city"])" /></div>
+  <div class="filterfield"><label for="q">Търсене</label><input id="q" name="q" placeholder="Име, адрес, описание..." value="@(ViewContext.HttpContext.Request.Query["q"])" /></div>
+  <div class="filterfield"><label for="city">Град</label><input id="city" name="city" placeholder="Например Бургас" value="@(ViewContext.HttpContext.Request.Query["city"])" /></div>
   <div class="filterfield"><label for="category">Категория</label>
     <select id="category" name="category">
       <option value="">Всички</option>
       @foreach (var cat in new[] { "Библиотека", "Кафене", "Coworking" })
       {
-        <option value="@cat" selected="@(Context.Request.Query["category"] == cat)">@cat</option>
+        <option value="@cat" selected="@(ViewContext.HttpContext.Request.Query["category"] == cat)">@cat</option>
       }
     </select>
   </div>
@@ -46,9 +46,9 @@
     </select>
   </div>
   <div class="checks">
-    <label><input type="checkbox" name="wifi" value="true" checked="@(Context.Request.Query["wifi"] == "true")" /> Wi-Fi</label>
-    <label><input type="checkbox" name="outlets" value="true" checked="@(Context.Request.Query["outlets"] == "true")" /> Контакти</label>
-    <label><input type="checkbox" name="quiet" value="true" checked="@(Context.Request.Query["quiet"] == "true")" /> Тихо</label>
+    <label><input type="checkbox" name="wifi" value="true" checked="@(ViewContext.HttpContext.Request.Query["wifi"] == "true")" /> Wi-Fi</label>
+    <label><input type="checkbox" name="outlets" value="true" checked="@(ViewContext.HttpContext.Request.Query["outlets"] == "true")" /> Контакти</label>
+    <label><input type="checkbox" name="quiet" value="true" checked="@(ViewContext.HttpContext.Request.Query["quiet"] == "true")" /> Тихо</label>
   </div>
   <button class="btn" type="submit">Намери място</button>
 </form>
@@ -94,10 +94,10 @@ else
   <form method="get" class="pagination">
     @foreach (var key in new[] { "q", "city", "category", "sort", "minRating", "wifi", "outlets", "quiet" })
     {
-      <input type="hidden" name="@key" value="@(Context.Request.Query[key])" />
+      <input type="hidden" name="@key" value="@(ViewContext.HttpContext.Request.Query[key])" />
     }
-    @if (page > 1) { <button type="submit" name="page" value="@(page - 1)">← Предишна</button> }
-    <span>Страница @page от @pages</span>
-    @if (page < pages) { <button type="submit" name="page" value="@(page + 1)">Следваща →</button> }
+    @if (currentPage > 1) { <button type="submit" name="page" value="@(currentPage - 1)">← Предишна</button> }
+    <span>Страница @currentPage от @pages</span>
+    @if (currentPage < pages) { <button type="submit" name="page" value="@(currentPage + 1)">Следваща →</button> }
   </form>
 }
