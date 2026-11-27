@@ -8,6 +8,10 @@ using StudySpot.Data;
 using StudySpot.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+// Diploma application: listen only on the local computer.
+builder.WebHost.ConfigureKestrel(o => o.ListenLocalhost(5080));
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RENDER")))
+    throw new InvalidOperationException("Public hosting is disabled for this diploma project.");
 builder.Services.AddControllersWithViews();
 builder.Services.AddAntiforgery(o => o.HeaderName = "X-CSRF-TOKEN");
 
@@ -28,15 +32,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
                 Database = Uri.UnescapeDataString(uri.AbsolutePath.TrimStart('/')),
                 Username = Uri.UnescapeDataString(credentials[0]),
                 Password = Uri.UnescapeDataString(credentials[1]),
-                SslMode = SslMode.Prefer
+                SslMode = SslMode.Require
             };
             options.UseNpgsql(connection.ConnectionString);
         }
         else options.UseNpgsql(dbUrl);
     }
-    else if (builder.Environment.IsDevelopment())
+    else
         options.UseSqlite(builder.Configuration.GetConnectionString("Default"));
-    else throw new InvalidOperationException("DATABASE_URL is required in production");
+
 });
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -56,7 +60,7 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.AccessDeniedPath = "/Account/Login";
     o.Cookie.HttpOnly = true;
     o.Cookie.SameSite = SameSiteMode.Lax;
-    if (!builder.Environment.IsDevelopment()) o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    o.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 builder.Services.AddRateLimiter(options =>
 {
@@ -78,8 +82,8 @@ builder.Services.AddRateLimiter(options =>
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
     await Seed.Initialize(scope.ServiceProvider);
-if (!app.Environment.IsDevelopment()) { app.UseExceptionHandler("/Home/Error"); app.UseHsts(); }
-if (app.Environment.IsDevelopment()) app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Home/Error");
+
 app.UseStatusCodePagesWithReExecute("/Home/Status", "?code={0}");
 app.UseStaticFiles();
 app.UseRouting();
