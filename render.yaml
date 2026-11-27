@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: studyspot-v2
+    runtime: docker
+    plan: free
+    region: frankfurt
+    repo: https://github.com/alexms08/StudySpot
+    branch: studyspot-v2
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: studyspot-db
+          property: connectionString
